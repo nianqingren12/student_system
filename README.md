@@ -1,1 +1,1 @@
-# C-_-
+C student project

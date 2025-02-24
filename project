@@ -1,0 +1,362 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <windows.h>
+#include <conio.h>
+
+// 定义学生结构体
+struct Student {
+    char id[20];
+    char name[50];
+    float highmathscores;    
+    float foreignlanguage;
+    float clanguage;
+    struct Student* next;//链表条件
+}stu;
+
+// 自定义函数声明
+void addStudent(struct Student** head);
+void displayStudents(struct Student* head);
+void searchStudent(struct Student* head);
+void addStudent_s(struct Student** head);
+void deletestudent(struct Student* head, struct Student* newSdent);
+void fixStudent(struct Student* head);
+void freeStudents(struct Student* head);
+
+//进入主函数
+int main() {
+    
+    system("color f0");
+    printf("\n\n\n");
+    printf("\t\t\t\t\t   欢迎进入学生信息管理系统\n\n");
+    printf("\t\t\t\t\t   ┅┅┅       LOGIN      ┅┅┅       \n");
+    int i;
+    for (i = 1;i < 121;i++)//以奇偶判断形成封线
+    {
+        if (i % 2 == 1)
+        {
+            Sleep(25);
+            printf("*");
+        }
+
+        else
+        {
+            Sleep(25);
+            printf(" ");
+        }
+    }
+    printf("\t\t\t\t\t");
+    system("pause");
+    system("cls");
+    struct Student* head = NULL;//定义头指针,这里很重要
+    int choice;
+    do {
+        printf("\n\n\t\t\t\t\t--- 学生信息管理系统 ---\n\n");
+        printf("\t\t\t\t\t请按选项前的号码进行选择~\n\n");
+        printf("\t\t\t\t\t1. 录入学生信息\n");
+        printf("\t\t\t\t\t2. 显示学生信息\n");
+        printf("\t\t\t\t\t3. 查找学生信息\n");
+        printf("\t\t\t\t\t4. 添加学生信息\n");
+        printf("\t\t\t\t\t5. 删除学生信息\n");
+        printf("\t\t\t\t\t6. 修改学生信息\n");
+        printf("\t\t\t\t\t7. 退出\n\n");
+        printf("\t\t\t\t\t请输入你的选择: ");
+        choice = _getche();//输入号码
+        for (i = 0; i < 12; i++) {
+            printf(".");
+            Sleep(100);
+        }
+        system("cls");
+        switch (choice) {
+        case 49:
+            addStudent(&head);
+            break;
+        case 50:
+            displayStudents(head);
+            break;
+        case 51:
+            searchStudent(head);
+            break;
+        case 52:
+            addStudent_s(&head);
+            break;
+        case 53:
+            deletestudent(head, head);
+            break;
+        case 54:
+            fixStudent(head);
+            break;
+        case 55:
+            freeStudents(head);
+            printf("\n已退出程序。\n");
+            break;
+        default:
+            printf("\n无效的选择，请重新输入。\n");
+            system("pause");
+            system("cls");
+        }
+    } while (choice != 55);
+    return 0;
+}
+
+// 录入学生信息
+void addStudent(struct Student** head) {
+    
+    printf("\n将学号设置为\"0\"，则本次学生信息录入结束。\n\n");
+    do
+    {
+        struct Student* newStudent = (struct Student*)malloc(sizeof(struct Student));
+        if (newStudent == NULL) //判断是否分配成功
+        {
+            printf("内存分配失败！\n");
+            return;
+        }
+        printf("请输入学号: ");
+        scanf("%s", newStudent->id);
+        if (strcmp(newStudent->id, "0\0") == 0)//判断是否需要结束写入
+        {
+            printf("\n结束录入...\n");
+            free(newStudent);//停止写入需要释放本次开辟的内存
+            newStudent = NULL;
+            break;
+        }
+        printf("请输入姓名: ");
+        scanf("%s", newStudent->name);
+        printf("请输入高数成绩: ");
+        scanf("%f", &newStudent->highmathscores);
+        printf("请输入外语成绩: ");
+        scanf("%f", &newStudent->foreignlanguage);
+        printf("请输入C语言成绩: ");
+        scanf("%f", &newStudent->clanguage);
+        printf("\n\n");
+        newStudent->next = *head;//这两条可以延长链表
+        *head = newStudent;
+        printf("学生信息录入成功！\n");
+    } while (1);    
+    system("pause");
+    system("cls");
+}
+
+// 显示学生信息
+void displayStudents(struct Student* head) {
+    if (head == NULL) //没写入就查看
+    {
+        printf("没有学生信息记录。\n");
+        system("pause");
+        system("cls");
+        return;
+    }    
+    printf("%-15s%-20s%-10s%-10s%-10s\n", "学号", "姓名", "高数成绩","外语成绩","c语言成绩");
+    while (head != NULL) { 
+        printf("%-15s%-20s%-10.2f%-10.2f%-10.2f\n", head->id, head->name, head->highmathscores,head->foreignlanguage,head->clanguage);
+        head = head->next;//沿链显示
+    }
+    system("pause");
+    system("cls");
+}
+
+// 查找学生信息
+void searchStudent(struct Student* head) {
+    char searchId[20];
+    if (head == NULL)
+    {
+        printf("\n没有学生信息\n");
+        system("pause");
+        system("cls");
+        return;
+    }
+    printf("请输入要查找的学号: ");
+    scanf("%s", searchId);
+    //逐个遍历
+    while (head != NULL) {
+        if (strcmp(head->id, searchId) == 0) //strcmp反0相同
+        {
+            printf("\n找到学生信息:\n");
+            printf("%-15s%-20s%-10s%-10s%-10s\n", "学号", "姓名", "高数成绩","外语成绩","c语言成绩");
+            printf("%-15s%-20s%-10.2f%-10.2f%-10.2f\n", head->id, head->name, head->highmathscores,head->foreignlanguage,head->clanguage);
+            system("pause");
+            system("cls");
+            return;
+        }
+        head = head->next;//实现遍历
+    }
+    printf("未找到学号为 %s 的学生信息。\n", searchId);
+    system("pause");
+    system("cls");
+}
+
+//添加学生信息
+void addStudent_s(struct Student** head) {
+
+    struct Student* newStudent = (struct Student*)malloc(sizeof(struct Student));
+    printf("\n开始添加学生信息...\n\n");
+    printf("请输入学号: ");
+    scanf("%s", newStudent->id);    
+    printf("请输入姓名: ");
+    scanf("%s", newStudent->name);
+    printf("请输入高数成绩: ");
+    scanf("%f", &newStudent->highmathscores);
+    printf("请输入外语成绩: ");
+    scanf("%f", &newStudent->foreignlanguage);
+    printf("请输入C语言成绩: ");
+    scanf("%f", &newStudent->clanguage);
+    printf("\n\n");
+    newStudent->next = *head;//接入链表
+    *head = newStudent;
+    printf("学生信息添加成功！\n");
+    system("pause");
+    system("cls");
+}
+
+//删除学生信息
+void deletestudent(struct Student* head,struct Student* newStudent)
+{   
+    
+    struct Student* Delete = NULL;//删除指针
+    struct Student* shadow = head;//影子指针（记录节点）
+    struct Student* node = NULL;//链表重连的近头节点
+   
+    if (head == NULL)
+    {
+        printf("\n无学生信息\n");
+        system("pause");
+        system("cls");
+    }
+    else
+    {
+        printf("\n\n请输入需删除学生的学号：");
+        char id_s[20];//查找所需对比id数组
+        scanf("%s", id_s);
+
+        while (1)
+        {
+            if (strcmp(head->id, id_s) == 0)//解决首个即删除问题
+            {
+                printf("已删除学生%s的信息", id_s);
+                Delete = head;
+                head = head->next;//head后退
+                free(Delete);
+                system("pause");
+                system("cls");
+                return;
+            }
+            else//解决非首个即删除问题，需要考虑链表重接
+            {
+                shadow = head;
+                head = head->next;
+                while (1)
+                {
+                    if (strcmp(head->id, id_s) == 0)
+                    {
+                        printf("已删除学生%s的信息", id_s);
+                        Delete = head;
+                        head = head->next;//head后退
+                        node = head;//设立节点
+                        head = newStudent;//head前进到尾处，保持指向尾部
+                        free(Delete);
+                        shadow->next = node;//重连链表
+                        system("pause");
+                        system("cls");
+                        return;
+                    }
+                    else
+                    {                        
+                        if (head == NULL)//找不到
+                        {
+                            printf("\n没有找到该学生信息\n");
+                            system("pause");
+                            system("cls");
+                            return;
+                        }
+                        shadow = head;//影子跟进
+                        head = head->next;
+                    }
+                }
+            }
+        }
+    }
+    
+}
+
+//修改信息
+void fixStudent(struct Student* head)
+{
+    struct Student* fix = head;//创建修改指针
+    char fixID[20];//创建临时数组
+    if (fix == NULL)
+    {
+        printf("\n没有学生信息\n");
+        system("pause");
+        system("cls");
+        return;
+    }
+    printf("\n\n请输入需修改学生的学号:");    
+    scanf("%s", fixID);
+    
+    if (fix->next == NULL)
+    {
+        
+        if (strcmp(fix->id, fixID) == 0)//遍历寻找真实ID
+        {
+            printf("\n开始修改学生信息...\n\n");
+            printf("请输入学号: ");
+            scanf("%s", fix->id);
+            printf("请输入姓名: ");
+            scanf("%s", fix->name);
+            printf("请输入高数成绩: ");
+            scanf("%f", &fix->highmathscores);
+            printf("请输入外语成绩: ");
+            scanf("%f", &fix->foreignlanguage);
+            printf("请输入C语言成绩: ");
+            scanf("%f", &fix->clanguage);
+            printf("\n---修改完成---\n");
+            system("pause");
+            system("cls");
+            return;
+        }
+    }
+    else
+    {
+        while (1)
+        {
+            if (fix->next == NULL )
+            {
+                printf("\n没有此学生的信息\n\n");
+                system("pause");
+                system("cls");
+                return;
+            }
+            if (strcmp(fix->id, fixID) == 0)//遍历寻找真实ID
+            {
+                printf("\n开始修改学生信息...\n\n");
+                printf("请输入学号: ");
+                scanf("%s", fix->id);
+                printf("请输入姓名: ");
+                scanf("%s", fix->name);
+                printf("请输入高数成绩: ");
+                scanf("%f", &fix->highmathscores);
+                printf("请输入外语成绩: ");
+                scanf("%f", &fix->foreignlanguage);
+                printf("请输入C语言成绩: ");
+                scanf("%f", &fix->clanguage);
+                printf("\n---修改完成---\n");
+                system("pause");
+                system("cls");
+                return;
+            }
+            fix = fix->next;
+        }
+    }
+    
+}
+
+// 释放内存
+void freeStudents(struct Student* head) {
+    struct Student* temp;//建立释放指针
+    while (head != NULL) {
+        temp = head;
+        head = head->next;//逐个释放
+        free(temp);
+    }
+}
